@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/jamaps/jamaps.github.io/master/icons/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>Jeff Allen</title>
+    <link type="text/css" rel="stylesheet" href="assets/css/github-markdown.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/main.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/hljs-github.min.css"/>
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ["%%","%%"] ],
+      processEscapes: true
+    }
+  });
+</script>
+    <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async>
+</script>
+  </head>
+  <body>
+    <div id="top">
+
+        <br>
+        <h1><b>Jeff Allen</b></h1>
+        <br>
+        <h2><a href="http://jamaps.github.io/index.html">About</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/notes.html"><b>Notes</b> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/maps.html">Maps</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/research.html">Research</a>     </h2>
+        <br>
+
+    </div>
+    <div id="line"></div>
+    <article class="markdown-body"><p class="img-container"><img src="h.png" alt="header"></p>
+<h2 id="intro-to-(q)gis"><a class="header-link" href="#intro-to-(q)gis"></a>Intro to (Q)GIS</h2>
+<p>We use Geographic Information Systems (GIS) to analyze, manipulate, and visualize spatial information on a computer.</p>
+<p>Why is GIS useful?</p>
+<ul class="list">
+<li>visualize spatial data</li>
+<li>explore spatial patterns and relationships</li>
+<li>make pretty and useful maps</li>
+<li>generate new data, either &quot;by hand&quot; or via spatial relationships from other data (e.g. through spatial queries)</li>
+<li>perform spatial analysis (i.e. statistical methods applied to spatial data)</li>
+</ul>
+<p>GIS is often thought of as more than just a tool or piece of software. It can refer to all aspects of managing and analyzing digital spatially referenced data.</p>
+<p>The following provides a brief overview of GIS followed by two short tutorials for getting started with GIS. The first tutorial uses data from the 1854 cholera outbreak in London. The second analyzes demographic data from the Canadian census as well as public transit data for Toronto.</p>
+<hr>
+<h3 id="1---spatial-data"><a class="header-link" href="#1---spatial-data"></a>1 - Spatial Data</h3>
+<p>A spatial dataset is a combination of...</p>
+<ul class="list">
+<li>attribute data (the <strong>what</strong>)</li>
+<li>location data and spatial dimensions (the <strong>where</strong>)</li>
+</ul>
+<p>Spatial data, this combination of attribute and location data, can be managed and represented in a number of different ways.</p>
+<p>For example, a city can be represented on a map via it&#39;s geographic coordinates (e.g. latitude and longitude) and then labelled or styled with any associated attribute data.</p>
+<center>
+<img src="img_olympic.png" alt="points">
+</center>
+
+<p>Here&#39;s some of the same data in tabular form:</p>
+<center>
+<img src="img_olympic_table.png" alt="table">
+</center>
+
+<p>Importantly, there are always uncertainty about the level of accuracy, precision, and resolution of spatial data. Spatial data are representations of reality, and thus have some loss of information when used for visualization and analysis. Any analysis can only be as good as the available data.</p>
+<p>The two most common forms of spatial data are <strong>vector</strong> data and <strong>raster</strong> data.</p>
+<h4 id="vector-data"><a class="header-link" href="#vector-data"></a>Vector Data</h4>
+<p>Vector data uses coordinates, or a series of coordinates, to create points (like the previous example), lines, and polygons representing real-world features (e.g. lines to represent roads and rail, points for transit stops, polygons for parks and buildings, etc.). The same underlying features can be represented with different geometries, often depending on the scale of analysis (e.g. a city can be represented as point or as a polygon pertaining to it&#39;s administrative boundary).</p>
+<p><center>
+<img src="img_vector_toronto.png" alt="vector">
+</center>
+Vector data from OpenStreetMap</p>
+<h4 id="raster-data"><a class="header-link" href="#raster-data"></a>Raster Data</h4>
+<p>Raster data represents the world as continuous grid with equal cell sizes. Each cell contains a value pertaining to the type of feature it represents. These values can be quantitative (e.g. elevation) or categorical (e.g. type of land use). Common examples of raster data include digital elevation models (DEMs), satellite imagery, and scanned images (e.g. historical maps).</p>
+<p><center>
+<img src="img_raster_ex.png" alt="vector">
+</center>
+DEM of Toronto and Lake Ontario (<em>Data from NOAA</em>)</p>
+<hr>
+<h3 id="2---spatial-data-&-gis"><a class="header-link" href="#2---spatial-data-&-gis"></a>2 - Spatial Data &amp; GIS</h3>
+<h4 id="working-with-data-in-gis"><a class="header-link" href="#working-with-data-in-gis"></a>Working with data in GIS</h4>
+<p>GIS software usually links to data stored elsewhere on a computer, rather than in a project file. If the source location of the data (i.e. which folder it&#39;s in) changes, then this will have to be updated in the GIS project. If data are edited in GIS, it will update the data in its source location.</p>
+<p>The predominant data modal within a GIS is to work with data stored in different <strong>layers</strong> (e.g. a layer for roads, another for buildings, and so on). These layers can be visualized and analyzed in conjunction with each other based on their spatial relationships.</p>
+<p><center>
+<img src="img_layers.png" alt="vector">
+</center>
+<em>Image from Bolstad (2012)</em></p>
+<h4 id="common-gis-software"><a class="header-link" href="#common-gis-software"></a>Common GIS software</h4>
+<p>Desktop GIS software</p>
+<ul class="list">
+<li>QGIS (free, open source, can do a great many things)</li>
+<li>ArcGIS (proprietary, used by big organizations, but loosing popularity in tech and academia)</li>
+</ul>
+<p>Web-based GIS and mapping</p>
+<ul class="list">
+<li>CARTO (commercial, free basic accounts)</li>
+<li>MapBox (commercial, free basic accounts)</li>
+<li>Tableau, D3, MangoMap, etc.</li>
+</ul>
+<p>Data management &amp; processing of spatial data</p>
+<ul class="list">
+<li>Python, R (for processing data, statistical analysis, making simple maps)</li>
+<li>PostGIS (spatial databases and queries)</li>
+</ul>
+<p>Many more!</p>
+<hr>
+<h3 id="3---tutorial,-part-i"><a class="header-link" href="#3---tutorial,-part-i"></a>3 - Tutorial, Part I</h3>
+<h4 id="visualizing-points-and-rasters,-simple-geo-processing"><a class="header-link" href="#visualizing-points-and-rasters,-simple-geo-processing"></a>visualizing points and rasters, simple geo-processing</h4>
+<p>First let&#39;s download QGIS from <a href="https://www.qgis.org/en/site/">here</a> if you haven&#39;t already. It can be downloaded on most Linux, Mac, or Windows computers.</p>
+<p>Data for this example can be downloaded by clicking <a href="https://github.com/jamaps/etc/raw/master/QGIS_intro/london.zip">here</a>.</p>
+<p>This includes three datasets:</p>
+<ul class="list">
+<li>a historical map of London (a geo-referenced raster image)</li>
+<li>the locations of cholera deaths, a vector point dataset containing the number of deaths at each point</li>
+<li>the point locations of water pumps</li>
+</ul>
+<p>The GIS data was originally created by <a href="http://blog.rtwilson.com/john-snows-cholera-data-in-more-formats/">Robin Wilson</a> while more information about the 1854 cholera outbreak can be read on <a href="https://en.wikipedia.org/wiki/1854_Broad_Street_cholera_outbreak">Wikipedia</a></p>
+<p>Open up QGIS. The top provides menus with a number of different options, and buttons for commonly used tools. The main panel is for visualizing and interacting with spatial data. On the left are a browser (to locate data on your computer) and the layers panel (which indicates the layers on the map, and what <em>order</em> they are displayed in). On the right there might be panels for finding processing tools, or for identifying features.</p>
+<p>To add data, go to <code>Layer - Add Layer</code>, or by finding the file in the browser panel, and locate to where the data was downloaded onto your computer.</p>
+<p class="img-container"><img src="img_qgis_overview.png" alt="vector"></p>
+<ol class="list">
+<li>Open and explore the data. Examine the layer structure. There are two point data files and one raster image.</li>
+<li>Right-click on the layer (in the layers panel) to examine attribute tables, layer properties, among other things.</li>
+<li>Practice styling layers by opening up the layer properties, going to symbology. Make the Pumps layer have larger symbols and a brighter colour. Style the cholera_deaths layer using the graduated option. This styles the points by their values, and we can now see where there were addresses with high death counts.</li>
+</ol>
+<p class="img-container"><img src="img_qgis_style.png" alt="vector"></p>
+<p>GIS can do more than just styling existing data. We can also create new data via spatial relationships. As a simple example, let&#39;s try to count the number of deaths there were within 100m of each pump. This will make use of a few commonly used geoprocessing steps.</p>
+<ul class="list">
+<li>Open up the processing panel by going to <code>Processing - Toolbox</code></li>
+<li>Search for <code>buffer</code> and open up <code>Buffer</code> under <code>Vector Geometry</code></li>
+<li>Navigate the window to compute 100m buffers around the Pumps layer</li>
+<li>Now, search for <code>join</code> and open up <code>Join Attributes by Location (Summary)</code> under <code>Vector General</code>. This tool will allow us to sum the number of deaths which overlap with each of these buffers.</li>
+<li>Navigate the window to input <code>count</code> into <code>Fields to Summarise</code> and <code>mean</code> in <code>Summaries to calculate</code></li>
+</ul>
+<p class="img-container"><img src="img_qgis_spatial_join.png" alt="vector"></p>
+<p>Open up the attribute table of the output to see the results. There should be 194 deaths within 100m of the Broad Street pump.</p>
+<hr>
+<h3 id="4---tutorial,-part-ii"><a class="header-link" href="#4---tutorial,-part-ii"></a>4 - Tutorial, Part II</h3>
+<h4 id="lines-and-polygons,-joining-tabular-data,-choropleths,-dot-densities"><a class="header-link" href="#lines-and-polygons,-joining-tabular-data,-choropleths,-dot-densities"></a>lines and polygons, joining tabular data, choropleths, dot-densities</h4>
+<p>Start up a new QGIS project and add in the data downloaded from <a href="https://github.com/jamaps/etc/raw/master/QGIS_intro/toronto.zip">here</a>.</p>
+<p>First, let&#39;s look at data. We have a polygon layer which represents census dissemination areas. These are the smallest geographic level in which demographic and socio-economic data is aggregated for the Canadian census.</p>
+<p>We also have a line layer representing major transit lines in Toronto. We can categorize line data by <code>status</code>, using different colours or line types to display whether the transit route is existing or under construction.</p>
+<p class="img-container"><img src="img_qgis_tor.png" alt="vector"></p>
+<hr>
+<h3 id="references:"><a class="header-link" href="#references:"></a>References:</h3>
+<p>Data used in these tutorials:</p>
+<ul class="list">
+<li><a href="https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-eng.cfm">Census boundary data</a> from Statistics Canada</li>
+<li><a href="https://www12.statcan.gc.ca/census-recensement/2011/geo/bound-limit/bound-limit-eng.cfm">Census tabular data</a> from Statistics Canada</li>
+<li><a href="http://blog.rtwilson.com/john-snows-cholera-data-in-more-formats/">1854 Cholera Data</a> from Robin Wilson</li>
+<li><a href="ttps://github.com/SAUSy-Lab/canada-transit-access">Transit accessibility measures</a> from Jeff Allen</li>
+</ul>
+<p>General GIS info:</p>
+<ul class="list">
+<li><a href="http://www.paulbolstad.net/gisbook.html">Intro GIS textbook</a> by <a href="https://paulbolstad.net/">Paul Bolstad</a></li>
+<li>Some of the introductory discussion stems from slides provided by <a href="https://www.utsc.utoronto.ca/geography/glenn-brauen">Glenn Brauen</a></li>
+</ul>
+<p>QGIS information:</p>
+<ul class="list">
+<li><a href="https://docs.qgis.org/2.8/en/docs/gentle_gis_introduction/index.html">QGIS Documentation \&amp; Official Tutorials</a></li>
+<li><a href="https://www.qgistutorials.com/en/">Great in-depth QGIS Tutorials</a> by Ujaval Gandhi</li>
+</ul>
+<!-- GBrauen -->
+    </article>
+  </body>
+</html>

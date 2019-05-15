@@ -1,0 +1,116 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/jamaps/jamaps.github.io/master/icons/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>Jeff Allen</title>
+    <link type="text/css" rel="stylesheet" href="assets/css/github-markdown.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/main.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/hljs-github.min.css"/>
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ["%%","%%"] ],
+      processEscapes: true
+    }
+  });
+</script>
+    <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async>
+</script>
+  </head>
+  <body>
+    <div id="top">
+
+        <br>
+        <h1><b>Jeff Allen</b></h1>
+        <br>
+        <h2><a href="http://jamaps.github.io/index.html">About</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/notes.html"><b>Notes</b> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/maps.html">Maps</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/research.html">Research</a>     </h2>
+        <br>
+
+    </div>
+    <div id="line"></div>
+    <article class="markdown-body"><p class="img-container"><img src="h.png" alt="header"></p>
+<h2 id="markdown-to-html"><a class="header-link" href="#markdown-to-html"></a>Markdown to HTML</h2>
+<p>What&#39;s the goal here? To take something I write in markdown <code>.md</code> and convert it into a clean <code>.html</code> page (like this page!). Things I want to convert sometimes in include</p>
+<ul class="list">
+<li>Blobs of text, sometimes in paragraph form</li>
+<li>Headings and sub-headings</li>
+<li>Math Formulas</li>
+<li>Stylized Code Blocks</li>
+<li>Links to places on the internet</li>
+<li>Embedded Images</li>
+<li>Lists</li>
+</ul>
+<p>To start, set up a project folder like so.</p>
+<pre class="hljs"><code>├── 2019
+│   └── md_to_html
+│       ├── html
+│       └── md
+│           └── index.md
+├── main.css
+├── render.py
+├── add.html</code></pre><p>Where <code>index.md</code> is where I write in glorious markdown. The sub-sub-folder <code>html</code> is where we will build the output. Don&#39;t worry about the other files for now.</p>
+<p>My starting point for this is <a href="https://github.com/mixu/markdown-styles">markdown-styles</a>. At a simple level, this tool converts <code>.md</code> to <code>.html</code> as follows (but click on the link to the project for more detail)</p>
+<pre class="hljs"><code>generate-md --layout github --input ./md --output ./html</code></pre><p>This provides a good basis. It already renders lists, sets up proper links, and loads in images no problem (images default to the body width if they have a greater pixel width). It also provides code blocks, stylized using the default GitHub template. Still needs some additions.</p>
+<h3 id="adding-custom-css"><a class="header-link" href="#adding-custom-css"></a>Adding Custom CSS</h3>
+<p>To do so, I set up a folder called <code>main.css</code> with the tweaks that I want. This is added to the project folder.</p>
+<p>When the <code>generate-md</code> command runs, it sets up a folder called <code>assets/</code> in <code>html/</code>. Then, I copy <code>main.css</code> into this folder.</p>
+<pre class="hljs"><code>cp main.css /2019/html/assets/css/main.css</code></pre><p>However, the HTML file still needs to be updated to include reference to <code>main.css</code>. Can copy this into the header of the HTML file.</p>
+<pre class="hljs"><code><span class="hljs-tag">&lt;<span class="hljs-name">link</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/css"</span> <span class="hljs-attr">rel</span>=<span class="hljs-string">"stylesheet"</span> <span class="hljs-attr">href</span>=<span class="hljs-string">"assets/css/main.css"</span>&gt;</span></code></pre><h3 id="adding-formulas"><a class="header-link" href="#adding-formulas"></a>Adding Formulas</h3>
+<p>Next, I also want to occasionally write some math formulas, either inline, %%u = 42%%, or on their own line like so</p>
+<p>$$Y = \alpha + \beta X + \epsilon $$</p>
+<p>To do this, I&#39;ll make use of the handy tool <a href="https://www.mathjax.org/">MathJax</a> which can take math written in <code>.tex</code> and render it as pretty formulas. To get this working, copy the following into the HTML header.</p>
+<pre class="hljs"><code><span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/x-mathjax-config"</span>&gt;</span><span class="actionscript">
+MathJax.Hub.Config({
+tex2jax: {
+  inlineMath: [ [<span class="hljs-string">"%%"</span>,<span class="hljs-string">"%%"</span>] ],
+  processEscapes: <span class="hljs-literal">true</span>
+}
+});
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span>
+<span class="hljs-tag">&lt;<span class="hljs-name">script</span> <span class="hljs-attr">type</span>=<span class="hljs-string">"text/javascript"</span> <span class="hljs-attr">async</span>
+<span class="hljs-attr">src</span>=<span class="hljs-string">"https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML"</span> <span class="hljs-attr">async</span>&gt;</span><span class="undefined">
+</span><span class="hljs-tag">&lt;/<span class="hljs-name">script</span>&gt;</span></code></pre><h3 id="automation"><a class="header-link" href="#automation"></a>Automation</h3>
+<p>It&#39;s a little annoying to copy this extra HTML every single time I want to render a page. So let&#39;s combine everything into a single python script, which takes the sub-folder name, in this case <code>md_to_html</code> as an input, and renders everything in one swoop.</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> subprocess
+
+<span class="hljs-comment"># input the project name</span>
+print(<span class="hljs-string">"Year: "</span>)
+year = input()
+print(<span class="hljs-string">"Name: "</span>)
+name = input()
+folder_name = year + <span class="hljs-string">"/"</span> + name + <span class="hljs-string">"/"</span>
+print(folder_name)
+
+<span class="hljs-comment"># run generate-md to conver the md file to github-like html</span>
+subprocess.call([<span class="hljs-string">'generate-md'</span>, <span class="hljs-string">'--layout github'</span>, <span class="hljs-string">'--input'</span>, folder_name + <span class="hljs-string">'md'</span>, <span class="hljs-string">'--output'</span>, folder_name + <span class="hljs-string">'/html'</span>])
+
+<span class="hljs-comment"># copy in the main.css file</span>
+subprocess.call([<span class="hljs-string">'cp'</span>, <span class="hljs-string">'main.css'</span>, folder_name + <span class="hljs-string">'html/assets/css/main.css'</span>])
+
+<span class="hljs-comment"># combine the extra html to the top of the generated index.html</span>
+addhtml = open(<span class="hljs-string">"add.html"</span>,<span class="hljs-string">"r"</span>)
+out_html = <span class="hljs-string">""</span>
+<span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> addhtml:
+    <span class="hljs-keyword">if</span> row != <span class="hljs-string">""</span>:
+        out_html = out_html + row
+addhtml.close()
+mainhtml = open(folder_name + <span class="hljs-string">'/html/index.html'</span>,<span class="hljs-string">"r"</span>)
+flag = <span class="hljs-number">0</span>
+<span class="hljs-keyword">for</span> row <span class="hljs-keyword">in</span> mainhtml:
+    <span class="hljs-keyword">if</span> flag == <span class="hljs-number">1</span> <span class="hljs-keyword">and</span> row != <span class="hljs-string">""</span>:
+        out_html += row
+    <span class="hljs-keyword">if</span> <span class="hljs-string">"&lt;body&gt;"</span> <span class="hljs-keyword">in</span> row:
+        flag = <span class="hljs-number">1</span>
+print(out_html)
+mainhtml.close()
+finalhtml = open(folder_name + <span class="hljs-string">'/html/index.html'</span>, <span class="hljs-string">"w"</span>)
+finalhtml.write(out_html)
+finalhtml.close()
+print(<span class="hljs-string">"meow"</span>)</code></pre><hr>
+<p>:)</p>
+    </article>
+  </body>
+</html>
