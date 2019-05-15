@@ -14,7 +14,7 @@ Why is GIS useful?
 
 GIS is often thought of as more than just a tool or piece of software. It can refer to all aspects of managing and analyzing digital spatially referenced data.
 
-The following provides a brief overview of GIS followed by two short tutorials for getting started with GIS. The first tutorial uses data from the 1854 cholera outbreak in London. The second analyzes demographic data from the Canadian census as well as public transit data for Toronto.
+The following provides a brief overview of GIS followed by two short tutorials for getting started with GIS, using [QGIS](https://www.qgis.org/en/site/), a free and open source desktop GIS software. The first tutorial uses data from the 1854 cholera outbreak in London. The second analyzes demographic data from the Canadian census as well as public transit data for Toronto.
 
 ---
 
@@ -117,7 +117,7 @@ This includes three datasets:
 - the locations of cholera deaths, a vector point dataset containing the number of deaths at each point
 - the point locations of water pumps
 
-The GIS data was originally created by [Robin Wilson](http://blog.rtwilson.com/john-snows-cholera-data-in-more-formats/) while more information about the 1854 cholera outbreak can be read on [Wikipedia](https://en.wikipedia.org/wiki/1854_Broad_Street_cholera_outbreak)
+The GIS data was originally created by [Robin Wilson](http://blog.rtwilson.com/john-snows-cholera-data-in-more-formats/) while more information about the 1854 cholera outbreak can be read on [Wikipedia](https://en.wikipedia.org/wiki/1854_Broad_Street_cholera_outbreak).
 
 Open up QGIS. The top provides menus with a number of different options, and buttons for commonly used tools. The main panel is for visualizing and interacting with spatial data. On the left are a browser (to locate data on your computer) and the layers panel (which indicates the layers on the map, and what *order* they are displayed in). On the right there might be panels for finding processing tools, or for identifying features.
 
@@ -125,9 +125,11 @@ To add data, go to `Layer - Add Layer`, or by finding the file in the browser pa
 
 ![vector](img_qgis_overview.png)
 
+Let's try to accomplish the following:
+
 1. Open and explore the data. Examine the layer structure. There are two point data files and one raster image.
 2. Right-click on the layer (in the layers panel) to examine attribute tables, layer properties, among other things.
-3. Practice styling layers by opening up the layer properties, going to symbology. Make the Pumps layer have larger symbols and a brighter colour. Style the cholera_deaths layer using the graduated option. This styles the points by their values, and we can now see where there were addresses with high death counts.
+3. Practice styling layers by opening up the layer properties, going to symbology. In here, we can edit the size, shape, and colour of the layers, among other things. Let's then style the cholera_deaths layer using the graduated option. This styles the points by their values, and we can now see where there were addresses with high death counts.
 
 ![vector](img_qgis_style.png)
 
@@ -151,7 +153,7 @@ Open up the attribute table of the output to see the results. There should be 19
 
 ### 4 - Tutorial, Part II
 
-#### lines and polygons, joining tabular data, choropleths, dot-densities
+#### lines and polygons, joining tabular data, choropleths
 
 Start up a new QGIS project and add in the data downloaded from [here](https://github.com/jamaps/etc/raw/master/QGIS_intro/toronto.zip).
 
@@ -161,8 +163,13 @@ We also have a line layer representing major transit lines in Toronto. We can ca
 
 ![vector](img_qgis_tor.png)
 
+Also included is a `.csv` table which contains data linked to the unique identifier, `dauid`, of each dissemination area. We can use the `dauid` to join this tabular data to the spatial boundaries of dissemination areas. Do so by, first adding the table as a layer into QGIS. Then open up the properties of the dissemination area boundary, and go to join. Navigate the options by joining the data by `dauid`. Once complete, we can open up the attribute table and see these additional columns.
 
+We can now visualize these polygons as a [choropleth map](https://en.wikipedia.org/wiki/Choropleth_map). Similar to the previous tutorial, open up the layer properties, go to symbology, and style based on graduated symbols. Notice the options available for classifying data (number of bins, whether to use quantiles or equal intervals, etc.). Different classification schemes can highlight or hide different spatial patterns. Also, it's often preferred to visualize a choropleth as a rate or a density (in terms of people per area) in order not to exaggerate counts in larger areas.
 
+For example, the following shows a choropleth map of the density of the number of people in low-income households per km^2 in Toronto
+
+![vector](img_choro.png)
 
 
 ---
