@@ -85,7 +85,7 @@ The predominant data modal within a GIS is to work with data stored in different
 
 Desktop GIS software
 - QGIS (free, open source, can do a great many things)
-- ArcGIS (proprietary, used by big organizations, but loosing popularity in tech and academia)
+- ArcGIS (proprietary, used by big organizations, but losing popularity in tech and academia)
 
 Web-based GIS and mapping
 - CARTO (commercial, free basic accounts)
