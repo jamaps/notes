@@ -15,7 +15,7 @@ I originally accessed individual level data on a secure server. I cross-tabbed e
 
 The data were subset to only include persons 18 years and older, and only for trips that begin and end in the GTHA. The reason for the latter, is that we do not have accurate data for travel times to places outside of the region.
 
-The result is a summary of %%n = %% 534,301 trip in the survey, which can be expanded to %%N = %% 11,533,176. This is roughly equivalent to a little over 2 trips per person, on average. Let's start by plotting the overall mode share of these trips:
+The result is a summary of %%n = %% 534,301 trips in the survey, which can be expanded to %%N = %% 11,533,176 trips across the region. Let's start by plotting the overall mode share of these trips:
 
 [![image](img_mode.png)](img_mode.png)
 
@@ -54,7 +54,7 @@ Our interest here is looking at how people in different income groups vary in te
 A few interesting things here: 10% of drivers are in low-income households compared to 23% of public transit riders.
 Second, only 2% of people who travel by GO are in low-income households, compared to 43% who are in the highest income bracket. Likely because GO transit primarily serves wealthy suburban commuters.
 
-Now let's flip this around and look at the percent of trips by mode for each income group. First let's look at active travel. We find that ow-income people are more inclined to walk than higher income brackets. Although there is less of a difference when looking at cycling.
+Now let's flip this around and look at the percent of trips by mode for each income group. First let's look at active travel. We find that low-income people are more inclined to walk than higher income brackets. There is less of a difference when looking at cycling.
 
 [![image](img_mode_income_active.png)](img_mode_income_active.png)
 
@@ -76,7 +76,7 @@ Let's look at car ownership for those who travel by different modes.
 
 [![image](img_mode_car.png)](img_mode_car.png)
 
-Unsurprisingly, people who drive have cars. While a smaller proportion of those who use alternative modes (public transit, walk, bike, taxi/rideshare) have cars. This could be by choice, i.e. these people live in areas where there are alternatives to car travel and thus choose not to buy a car, or not by choice, i.e. they cannot afford to buy a car, and are thus reliant on alternative modes. Many people who use alternative travel modes still have cars though, particularly those who use GO transit as many of these people live in the suburbs.
+Unsurprisingly, people who drive have cars. A relatively smaller percent of those who use alternative modes compared to driving have cars. This could be by choice, i.e. the people who live in areas where there are alternatives to car travel choose not to buy a car. Or this could be out of necessity, i.e. people cannot afford to buy a car, and are thus reliant on alternative modes. Many people who use alternative travel modes still have cars though, particularly those who use GO transit as many of these people live in the suburbs.
 
 Let's flip this around again, looking at the mode share by categories of household auto ownership.
 
@@ -84,11 +84,11 @@ Let's flip this around again, looking at the mode share by categories of househo
 
 People in households without cars indeed do a lot more active travel (it's uncertain though whether this is due to preference or necessity).
 
-Similar trends when looking at transit, but with a greater percent of trips.
+There are similar trends when looking at transit, but with a greater percent of trips.
 
 [![image](img_mode_car_transit.png)](img_mode_car_transit.png)
 
-And as expected, increasing number of trips by car with auto-ownership.
+And as expected, there are increasing amounts of trips by car with increasing auto-ownership.
 
 [![image](img_mode_car_drive.png)](img_mode_car_drive.png)
 
