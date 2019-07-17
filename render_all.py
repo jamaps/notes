@@ -1,7 +1,6 @@
 import subprocess
 
-folder_names = ["2019/intro_to_QGIS/","2019/md_to_html/"]
-#"2019/housing-affordability/","2019/intro_to_GIS_1/"
+folder_names = ["2019/mode-share-GTHA/"]
 
 for folder_name in folder_names:
 

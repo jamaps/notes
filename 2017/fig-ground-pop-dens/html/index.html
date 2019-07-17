@@ -1,0 +1,103 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/jamaps/jamaps.github.io/master/icons/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>Jeff Allen</title>
+    <link type="text/css" rel="stylesheet" href="assets/css/github-markdown.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/main.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/hljs-github.min.css"/>
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ["%%","%%"] ],
+      processEscapes: true
+    }
+  });
+</script>
+    <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async>
+</script>
+  </head>
+  <body>
+    <div id="top">
+
+        <br>
+        <h1><b>Jeff Allen</b></h1>
+        <br>
+        <h2><a href="http://jamaps.github.io/index.html">About</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/notes.html"><b>Notes</b> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/maps.html">Maps</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/research.html">Research</a>     </h2>
+        <br>
+
+    </div>
+    <div id="line"></div>
+    <article class="markdown-body"><p class="img-container"><img src="h.png" alt="header"></p>
+<h2 id="toronto-figure-ground-population-density-map"><a class="header-link" href="#toronto-figure-ground-population-density-map"></a>Toronto Figure-Ground Population Density Map</h2>
+<p><code>2017-06</code></p>
+<p>An experiment to combine census population data with building geometries to produce a fine-grained population density map.</p>
+<p><a href="https://sausy-lab.github.io/figure-ground-pop-density-map/index.html">https://sausy-lab.github.io/figure-ground-pop-density-map/index.html</a></p>
+<p>Data:</p>
+<ul class="list">
+<li>2016 Block Level Population Data - <a href="http://open.canada.ca/data/en/dataset/32f1a777-9fcf-4e4a-8c66-82c66a2e76f1">Statistics Canada</a></li>
+<li>2016 Building Massing Data - <a href="http://www1.toronto.ca/wps/portal/contentonly?vgnextoid=d431d477f9a3a410VgnVCM10000071d60f89RCRD">City of Toronto</a></li>
+</ul>
+<p>Tools:</p>
+<ul class="list">
+<li><a href="http://www.postgis.org/">PostGIS</a> for the spatial joins,</li>
+<li><a href="http://www.qgis.org/en/site/">QGIS</a> for the map layout and styling,</li>
+<li><a href="http://www.gdal.org/">GDAL</a> for generating raster web tiles,</li>
+<li><a href="http://leafletjs.com/">Leaflet</a> for showing in browser,</li>
+</ul>
+<p>The map isn&#39;t perfect. i.e. each building does not contain the <em>correct</em> living population. It was generated via an areal interpolation method based on volumetric ratios.</p>
+<p>The process is explained as follows:</p>
+<p>1 - Grab the building massing data and census block geometries with population counts and <code>shp2pgsql</code> them into a PostGIS database</p>
+<p>2 - Compute fields for area (m2) and volume (m3) of each building by using the local UTM projection. Also compute the centroid for a future join.</p>
+<pre class="hljs"><code><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span> buildings_w
+<span class="hljs-keyword">SELECT</span>
+gid <span class="hljs-keyword">as</span> gid,
+height <span class="hljs-keyword">as</span> height,
+ST_AREA(ST_Transform(geom,<span class="hljs-number">32617</span>)) * height <span class="hljs-keyword">As</span> volume,
+ST_Centroid(geom) <span class="hljs-keyword">as</span> geom
+<span class="hljs-keyword">FROM</span>
+buildings_in</code></pre><p>3 - Join the unique IDs of census blocks to each building.</p>
+<pre class="hljs"><code><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span>
+buildings_cb
+<span class="hljs-keyword">AS</span>
+(
+<span class="hljs-keyword">SELECT</span>
+buildings_w.gid <span class="hljs-keyword">as</span> gid,
+buildings_w.volume <span class="hljs-keyword">as</span> volume,
+buildings_w.geom <span class="hljs-keyword">as</span> geom,
+db_2016_tor.dbuid <span class="hljs-keyword">as</span> dbuid,
+db_2016_tor.pop <span class="hljs-keyword">as</span> dbpop
+<span class="hljs-keyword">FROM</span>
+building_centroids
+<span class="hljs-keyword">LEFT</span> <span class="hljs-keyword">JOIN</span> db_2016_tor
+<span class="hljs-keyword">ON</span> ST_Intersects(buildings_w.geom, db_2016_tor.geom)
+);</code></pre><p>4 - Window function to sum volumes by block ID.</p>
+<pre class="hljs"><code><span class="hljs-keyword">CREATE</span> <span class="hljs-keyword">TABLE</span>
+buildings_cb_g
+<span class="hljs-keyword">AS</span>
+(
+<span class="hljs-keyword">SELECT</span>
+volume <span class="hljs-keyword">as</span> volume,
+gid <span class="hljs-keyword">as</span> gid,
+dbuid <span class="hljs-keyword">as</span> dbuid,
+dbpop <span class="hljs-keyword">as</span> dbpop,
+<span class="hljs-keyword">sum</span>(volume) <span class="hljs-keyword">OVER</span> (<span class="hljs-keyword">PARTITION</span> <span class="hljs-keyword">BY</span> dbuid) <span class="hljs-keyword">AS</span> total_volume
+<span class="hljs-keyword">FROM</span>
+buildings_cb
+);</code></pre><p>5 - Estimate the building population via the</p>
+<pre class="hljs"><code><span class="hljs-keyword">ALTER</span> <span class="hljs-keyword">TABLE</span>
+buildings_cb_g
+<span class="hljs-keyword">ADD</span> <span class="hljs-keyword">COLUMN</span>
+building_pop <span class="hljs-keyword">double</span> <span class="hljs-keyword">precision</span>;
+<span class="hljs-keyword">UPDATE</span> buildings_cb_g
+<span class="hljs-keyword">SET</span> building_pop = dbpop * volume / total_volume;</code></pre><p>6 - Join to the building footprint geometries and style in QGIS geometrically. These are the colours:</p>
+<pre class="hljs"><code>[<span class="hljs-string">'#231151'</span>,<span class="hljs-string">'#5e177f'</span>,<span class="hljs-string">'#982c80'</span>,<span class="hljs-string">'#d3426e'</span>,<span class="hljs-string">'#f8765c'</span>,<span class="hljs-string">'#febb80'</span>,<span class="hljs-string">'#fcfdbf'</span>]</code></pre><p>7 - Export as a big dirty raster.tif <code>16384 x 16384</code> which is scale for web tiles.</p>
+<p>8 - Turn that raster.tif into web tiles with GDAL</p>
+<pre class="hljs"><code><span class="hljs-selector-tag">gdal_translate</span> <span class="hljs-selector-tag">-of</span> <span class="hljs-selector-tag">GTiff</span> <span class="hljs-selector-tag">-a_ullr</span> <span class="hljs-selector-tag">-180</span> 90 180 <span class="hljs-selector-tag">-90</span> <span class="hljs-selector-tag">-a_srs</span> <span class="hljs-selector-tag">EPSG</span><span class="hljs-selector-pseudo">:3857</span> <span class="hljs-selector-tag">test</span><span class="hljs-selector-class">.tif</span> <span class="hljs-selector-tag">map</span><span class="hljs-selector-class">.tif</span>
+<span class="hljs-selector-tag">gdal2tiles</span><span class="hljs-selector-class">.py</span> <span class="hljs-selector-tag">-p</span> <span class="hljs-selector-tag">raster</span> <span class="hljs-selector-tag">-z</span> 0<span class="hljs-selector-tag">-6</span> <span class="hljs-selector-tag">-w</span> <span class="hljs-selector-tag">none</span> <span class="hljs-selector-tag">map</span><span class="hljs-selector-class">.tif</span></code></pre><p>9 - Create the web map, see index.html</p>
+    </article>
+  </body>
+</html>

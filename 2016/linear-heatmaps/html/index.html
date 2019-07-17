@@ -1,0 +1,149 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/jamaps/jamaps.github.io/master/icons/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>Jeff Allen</title>
+    <link type="text/css" rel="stylesheet" href="assets/css/github-markdown.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/main.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/hljs-github.min.css"/>
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ["%%","%%"] ],
+      processEscapes: true
+    }
+  });
+</script>
+    <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async>
+</script>
+  </head>
+  <body>
+    <div id="top">
+
+        <br>
+        <h1><b>Jeff Allen</b></h1>
+        <br>
+        <h2><a href="http://jamaps.github.io/index.html">About</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/notes.html"><b>Notes</b> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/maps.html">Maps</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/research.html">Research</a>     </h2>
+        <br>
+
+    </div>
+    <div id="line"></div>
+    <article class="markdown-body"><p class="img-container"><img src="h.png" alt="header"></p>
+<h2 id="linear-heatmaps-of-home-campus-trips-in-the-toronto-region"><a class="header-link" href="#linear-heatmaps-of-home-campus-trips-in-the-toronto-region"></a>Linear Heatmaps of Home-Campus Trips in the Toronto Region</h2>
+<p><code>2016-10</code></p>
+<p>I built an interactive map built to visually explore and analyze the commuting patterns of post-secondary students in the Greater Toronto Area (GTA).</p>
+<p><a href="https://sausy-lab.github.io/SMTO_web_map/">https://sausy-lab.github.io/SMTO_web_map/</a></p>
+<p>The map conveys the spatial distribution of students for each campus, the scalar variations of different travel modes, and identifies critical travel routes. It can be queried to show trips to each of the seven campuses in the region and for different travel modes. Adjacent to the map are descriptive statistics of mode share, average travel times, and listings of the most travelled routes.</p>
+<p>The map was built with open data and open source software (OpenTripPlanner, QGIS, PostGIS, &amp; Mapbox). The following text briefly outlines some of the technical steps of how this map was built.</p>
+<h3 id="data-sources-&-preparation"><a class="header-link" href="#data-sources-&-preparation"></a>Data Sources &amp; Preparation</h3>
+<p>Data data data. There were three categories of data used to create this map:</p>
+<h4 id="1---openstreetmap"><a class="header-link" href="#1---openstreetmap"></a>1 - OpenStreetMap</h4>
+<p>For creating a street network graph and background cartography.</p>
+<p>OpenStreetMap data for the Toronto region can be downloaded via ...</p>
+<pre class="hljs"><code>wget http:<span class="hljs-regexp">//</span>overpass-api.de<span class="hljs-regexp">/api/m</span>ap?bbox=-<span class="hljs-number">80.9</span>,<span class="hljs-number">43.0</span>,-<span class="hljs-number">77.9</span>,<span class="hljs-number">44.5</span></code></pre><h4 id="2---gtfs"><a class="header-link" href="#2---gtfs"></a>2 - GTFS</h4>
+<p>General Transit Feed Specification (GTFS) data for creating adding transit to network graphs. GTFS is essentially a set of relational .csv tables including stop locations, stop times, route geometries, and trip schedules.</p>
+<p>GTFS data was acquired from the following Toronto area transit agencies:</p>
+<ul class="list">
+<li>Toronto Transit Commission</li>
+<li>GO Transit</li>
+<li>Durham Region Transit</li>
+<li>York Region Transit / Viva</li>
+<li>MiWay (Mississauga)</li>
+<li>Brampton Transit / Zum</li>
+<li>Oakville Transit</li>
+<li>Burlington Transit</li>
+<li>Hamilton Street Railway</li>
+</ul>
+<h4 id="3---studentmoveto"><a class="header-link" href="#3---studentmoveto"></a>3 - StudentMoveTO</h4>
+<p>The home locations, main campus, typical travel mode, and trip frequencies of post-secondary students were acquired from the 2015 StudentMoveTO survey. More about the StudentMoveTO dataset can be found here:
+<a href="http://www.studentmoveto.ca/">http://www.studentmoveto.ca/</a></p>
+<p>The publicly available dataset does not include the specific location of where students live because of privacy. However, exact coordinates are needed to generate a route between origin and destination points on a network graph. So these coordinates were estimated using a random number generator and a weighted probability function. The output of this function is more likely to return a point in sub-census areas (census blocks) that have a higher population than those that have a lower population. Here&#39;s how this was coded in Python and postgres via psycopg2:</p>
+<pre class="hljs"><code><span class="hljs-comment"># connect cursor to database</span>
+cur = conn.cursor()
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># get population of input census tract</span>
+cur.execute(<span class="hljs-string">"SELECT ctpop FROM c2011_ct WHERE ctuid = CAST(%s as text);"</span> %CT_in)
+ct_pop = cur.fetchone()
+ct_pop = ct_pop[<span class="hljs-number">0</span>]
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># grab list of all census blocks that are in that census tract</span>
+db_list = []
+cur.execute(<span class="hljs-string">"SELECT dbuid, dbpop FROM c2011_block WHERE ctuid = CAST(%s as text);"</span> %CT_in)
+<span class="hljs-keyword">for</span> record <span class="hljs-keyword">in</span> cur:
+    db_list.append([record[<span class="hljs-number">0</span>],record[<span class="hljs-number">1</span>]])
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># generate a random number such that 0 &lt; r &lt; ct_pop</span>
+r = random.random() * ct_pop
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># loop over block list and return block that has r in its pop range</span>
+c = <span class="hljs-number">0</span>
+<span class="hljs-keyword">for</span> block <span class="hljs-keyword">in</span> db_list:
+    block.append(c)
+    c = c + block[<span class="hljs-number">1</span>]
+    block.append(c)
+    <span class="hljs-keyword">if</span> r &gt;= block[<span class="hljs-number">2</span>] <span class="hljs-keyword">and</span> r &lt;= block[<span class="hljs-number">3</span>]:
+        out_block = block[<span class="hljs-number">0</span>]
+        <span class="hljs-keyword">break</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># generate a random point within this block</span>
+cur.execute(<span class="hljs-string">"SELECT ST_AsGeoJSON(randompointsinpolygon(geom, 1)) FROM c2011_block WHERE dbuid = CAST(%s as text);"</span> %out_block)
+<span class="hljs-comment"># parse the geojson to get x and y coordinates</span>
+t = ((cur.fetchone()[<span class="hljs-number">0</span>]).split(<span class="hljs-string">'['</span>)[<span class="hljs-number">1</span>]).split(<span class="hljs-string">','</span>)
+x = t[<span class="hljs-number">0</span>]
+y = (t[<span class="hljs-number">1</span>].split(<span class="hljs-string">','</span>)[<span class="hljs-number">0</span>]).split(<span class="hljs-string">']'</span>)[<span class="hljs-number">0</span>]
+<span class="hljs-keyword">print</span> x,y</code></pre><h3 id="routing-on-multi-modal-network-graphs"><a class="header-link" href="#routing-on-multi-modal-network-graphs"></a>Routing on Multi-Modal Network Graphs</h3>
+<p>Network graphs were built in order to estimate the travel paths that student&#39;s are most likely to take from their homes to their campuses. Network graphs were built with OpenTripPlanner, an open source routing engine written in Java, which be scripted with Python. The graph was built using OSM and GTFS data as inputs. It was stored on a local server which could return itineraries via custom requests. These requests were scripted with Python to input the origin (student&#39;s home coordinates), destination (campus coordinates), and travel mode of each student. This snippet is for a single origin-destination request:</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> requests
+
+url_string = <span class="hljs-string">"http://localhost:8080/otp/routers/default/plan?fromPlace="</span> + str(origin_lat) + <span class="hljs-string">"%2C"</span> + str(origin_lon) + <span class="hljs-string">"&amp;toPlace="</span> + str(destination_lat) + <span class="hljs-string">"%2C"</span> + str(destination_lon) + <span class="hljs-string">"&amp;time=8:00am&amp;date=07-20-2016&amp;mode="</span> + mode + <span class="hljs-string">"&amp;maxWalkDistance=999999&amp;arriveBy=false&amp;wheelchair=false&amp;locale=en"</span>
+
+page = requests.get(url_string)</code></pre><p>The output <code>page</code> is a json object which can be parsed to grab the route geometry and other itinerary attributes.</p>
+<pre class="hljs"><code><span class="hljs-keyword">import</span> json
+<span class="hljs-keyword">import</span> polyline
+
+trip_data = json.loads(page.content)
+
+<span class="hljs-comment"># grabbing attribute data:</span>
+<span class="hljs-comment"># --------------------------------</span>
+trip_duration = trip_data[<span class="hljs-string">'plan'</span>][<span class="hljs-string">'itineraries'</span>][<span class="hljs-number">0</span>][<span class="hljs-string">'duration'</span>]
+walk_distance = trip_data[<span class="hljs-string">'plan'</span>][<span class="hljs-string">'itineraries'</span>][<span class="hljs-number">0</span>][<span class="hljs-string">'walkDistance'</span>]
+
+<span class="hljs-comment"># grabbing route geometry:</span>
+<span class="hljs-comment"># --------------------------------</span>
+leg_count = len(trip_data[<span class="hljs-string">'plan'</span>][<span class="hljs-string">'itineraries'</span>][<span class="hljs-number">0</span>][<span class="hljs-string">'legs'</span>])
+l = <span class="hljs-number">0</span>
+line_coords = []
+<span class="hljs-keyword">while</span> l &lt; leg_count:
+    points = trip_data[<span class="hljs-string">'plan'</span>][<span class="hljs-string">'itineraries'</span>][<span class="hljs-number">0</span>][<span class="hljs-string">'legs'</span>][l][<span class="hljs-string">'legGeometry'</span>][<span class="hljs-string">'points'</span>]
+    line_geom = polyline.decode(points)
+    line_coords = line_coords + line_geom
+    l += <span class="hljs-number">1</span></code></pre><p>The Polyline library (<a href="https://pypi.python.org/pypi/polyline/">https://pypi.python.org/pypi/polyline/</a>) converts the line geometry from Google’s encoded polyline algorithm format (<a href="http://goo.gl/PvXf8Y">http://goo.gl/PvXf8Y</a>) into a Pythonic list. This is then stored in a dictionary and outputted as a .geojson file.</p>
+<p>A more complete version of the code which loops over all the survey respondents in the StudentMoveTO dataset can be found here:
+<a href="https://github.com/SAUSy-Lab/OpenTripPlanner_analysis/blob/master/grab_route_geom.py">https://github.com/SAUSy-Lab/OpenTripPlanner_analysis/blob/master/grab_route_geom.py</a></p>
+<h3 id="web-cartography-&-data-visualization"><a class="header-link" href="#web-cartography-&-data-visualization"></a>Web Cartography &amp; Data Visualization</h3>
+<p>The map interface was written in HTML, CSS, and Javascript using APIs from Mapbox. The dark background map was styled using Mapbox Studio. The route geometries were converted from geojson into vector tilesets for faster display. The route geometries were also simplified in order to appear at smaller scales. These were simplified in QGIS using &quot;Simplify Geometry&quot; under Vector/Geometry Tools and then added as a separate vector tileset. The point locations for the seven campuses are held in geojson. The widths of lines and points are styled as a function of their zoom levels. The transparency of each line is weighted by campus, mode, and how often the student travels to campus during the week in order to highlight routes that are more travelled than others (i.e. if a student travels more often, the line becomes more visible).</p>
+<p>Buttons for querying the map for travel mode and campuses were implemented using Mapbox GL JS filters:</p>
+<p>HTML:</p>
+<pre class="hljs"><code><span class="hljs-tag">&lt;<span class="hljs-name">div</span> <span class="hljs-attr">onclick</span>=<span class="hljs-string">'campus_switch("UTSC")'</span> <span class="hljs-attr">id</span>=<span class="hljs-string">'UTSC'</span>&gt;</span><span class="hljs-tag">&lt;<span class="hljs-name">p</span>&gt;</span>UTSC<span class="hljs-tag">&lt;/<span class="hljs-name">p</span>&gt;</span><span class="hljs-tag">&lt;/<span class="hljs-name">div</span>&gt;</span>
+<span class="hljs-comment">&lt;!-- where UTSC is the name of one of the seven campuses --&gt;</span></code></pre><p>JavaScript:</p>
+<pre class="hljs"><code><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">campus_switch</span>(<span class="hljs-params">campus_button</span>) </span>{
+  <span class="hljs-comment">// ....</span>
+  <span class="hljs-comment">// e.g. filter to only show the campus == campus_button</span>
+  filter = [<span class="hljs-string">"=="</span>, <span class="hljs-string">"campus"</span>, campus_button]
+  map.setFilter(<span class="hljs-string">'routes'</span>,filter);
+  <span class="hljs-comment">// ....</span>
+}</code></pre><p>The values on the bar charts were computed in R using the StudentMoveTO dataset and routing outputs. The widths of these charts were set in same functions as the map filters:</p>
+<pre class="hljs"><code><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">campus_switch</span>(<span class="hljs-params">campus_button</span>) </span>{
+  <span class="hljs-comment">// ....</span>
+  <span class="hljs-comment">// for example:</span>
+  avg_travel_time = <span class="hljs-number">60</span> <span class="hljs-comment">// minutes</span>
+  <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">'avg_travel_time_bar'</span>).style.width = <span class="hljs-built_in">String</span>(<span class="hljs-built_in">Math</span>.floor(avg_travel_time * <span class="hljs-number">3.3333333</span>)) + <span class="hljs-string">'px'</span>;
+  <span class="hljs-comment">// for a 100px : 30 minutes ratio</span>
+  <span class="hljs-comment">// ....</span>
+}</code></pre><hr>
+    </article>
+  </body>
+</html>

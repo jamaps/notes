@@ -1,0 +1,114 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/jamaps/jamaps.github.io/master/icons/favicon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimal-ui">
+    <title>Jeff Allen</title>
+    <link type="text/css" rel="stylesheet" href="assets/css/github-markdown.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/main.css">
+    <link type="text/css" rel="stylesheet" href="assets/css/hljs-github.min.css"/>
+    <script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ["%%","%%"] ],
+      processEscapes: true
+    }
+  });
+</script>
+    <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML" async>
+</script>
+  </head>
+  <body>
+    <div id="top">
+
+        <br>
+        <h1><b>Jeff Allen</b></h1>
+        <br>
+        <h2><a href="http://jamaps.github.io/index.html">About</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/notes.html"><b>Notes</b> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/maps.html">Maps</a> &nbsp;&nbsp;&nbsp; <a href="http://jamaps.github.io/research.html">Research</a>     </h2>
+        <br>
+
+    </div>
+    <div id="line"></div>
+    <article class="markdown-body"><p class="img-container"><img src="h.png" alt="header"></p>
+<h2 id="equal-area-buffers-for-lon-lat-coordinates"><a class="header-link" href="#equal-area-buffers-for-lon-lat-coordinates"></a>Equal-Area Buffers for Lon-Lat Coordinates</h2>
+<p><code>2017-04</code></p>
+<p>One day, I decided to hard-code creating equal area circular buffers for a given lon/lat coordinate and set radius.This came out of frustration of existing web-mapping libraries which only used lon/lat coordinates as the basis for buffers, which resulted in distortions in far away from the equator. e.g. ...</p>
+<p class="img-container"><img src="img_dist.png" alt="Buffer for Paris dist"></p>
+<p>This is due to most web-mapping libraries render the world using a <a href="https://en.wikipedia.org/wiki/Mercator_projection">Mercator projection</a>.</p>
+<p>The code below fixes this to create buffers that are circles (equal radius at all angles), rather than ellipses. This sis written in JavaScript so it can be used with web-mapping tech like Leaflet or OpenLayers.</p>
+<p class="img-container"><img src="img_example.png" alt="Buffer for Paris"></p>
+<h3 id="details:"><a class="header-link" href="#details:"></a>Details:</h3>
+<p>First we need to setup functions for converting radians to degrees, and from degrees to radians. JavaScript only worked in radians for me, not degrees.</p>
+<pre class="hljs"><code><span class="hljs-comment">// convert radians to degrees</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">to_deg</span>(<span class="hljs-params">radians</span>) </span>{
+    <span class="hljs-keyword">return</span> radians * <span class="hljs-number">180</span> / <span class="hljs-built_in">Math</span>.PI;
+};
+
+<span class="hljs-comment">// convert degrees to radians</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">to_radians</span>(<span class="hljs-params">degrees</span>) </span>{
+    <span class="hljs-keyword">return</span> degrees * <span class="hljs-built_in">Math</span>.PI / <span class="hljs-number">180</span>;
+};</code></pre><p>Since the Earth is not a perfect sphere, we need a function to compute the radius for specific latitude.</p>
+<pre class="hljs"><code><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">radius_at_lat</span>(<span class="hljs-params">latitude</span>) </span>{
+    r_a = <span class="hljs-number">6378137.0</span> <span class="hljs-comment">// equitorial radius (in m)</span>
+    r_b = <span class="hljs-number">6356752.3</span> <span class="hljs-comment">// polar radius (in m)</span>
+    <span class="hljs-keyword">var</span> radius =  <span class="hljs-built_in">Math</span>.sqrt(
+      (r_a * r_a * <span class="hljs-built_in">Math</span>.cos(latitude) * r_a * r_a * <span class="hljs-built_in">Math</span>.cos(latitude) + r_b * r_b * <span class="hljs-built_in">Math</span>.sin(latitude) * r_b * r_b * <span class="hljs-built_in">Math</span>.sin(latitude))
+      /
+      (r_a * <span class="hljs-built_in">Math</span>.cos(latitude) * r_a * <span class="hljs-built_in">Math</span>.cos(latitude) + r_b * <span class="hljs-built_in">Math</span>.sin(latitude) * r_b * <span class="hljs-built_in">Math</span>.sin(latitude))
+    );
+    <span class="hljs-keyword">return</span> radius
+};</code></pre><p>The <a href="https://en.wikipedia.org/wiki/Haversine_formula">Haversine formula</a> computes great circle distances and the associated bearing between two points on the Earth.</p>
+<p>Re-working this formula we can find the coordinates of a point given inputs of another point, bearing, and distance.</p>
+<pre class="hljs"><code><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">destination_point</span>(<span class="hljs-params">degrees_lat, degrees_long, distance, angle_circle_deg</span>) </span>{
+    <span class="hljs-keyword">var</span> bearing = to_radians(<span class="hljs-built_in">Number</span>(angle_circle_deg)); <span class="hljs-comment">//</span>
+    <span class="hljs-keyword">var</span> dr_ratio = <span class="hljs-built_in">Number</span>(radius / radius_at_lat(degrees_lat)); <span class="hljs-comment">// ratio of distance to</span>
+    <span class="hljs-keyword">var</span> i_lat = to_radians(degrees_lat); <span class="hljs-comment">// convert input to rad</span>
+    <span class="hljs-keyword">var</span> i_lon = to_radians(degrees_long); <span class="hljs-comment">// convert input to rad</span>
+    <span class="hljs-keyword">var</span> d_lat = <span class="hljs-built_in">Math</span>.asin(
+        <span class="hljs-built_in">Math</span>.sin(i_lat) * <span class="hljs-built_in">Math</span>.cos(dr_ratio) +
+        <span class="hljs-built_in">Math</span>.cos(i_lat) * <span class="hljs-built_in">Math</span>.sin(dr_ratio) * <span class="hljs-built_in">Math</span>.cos(bearing));
+    <span class="hljs-keyword">var</span> d_lon = i_lon + <span class="hljs-built_in">Math</span>.atan2(
+        <span class="hljs-built_in">Math</span>.sin(bearing) * <span class="hljs-built_in">Math</span>.sin(dr_ratio) * <span class="hljs-built_in">Math</span>.cos(i_lat),
+        <span class="hljs-built_in">Math</span>.cos(dr_ratio) - <span class="hljs-built_in">Math</span>.sin(i_lat) * <span class="hljs-built_in">Math</span>.sin(d_lat));
+    <span class="hljs-comment">// convert to long 180 to -180</span>
+    d_lon = (d_lon + <span class="hljs-number">3</span> * <span class="hljs-built_in">Math</span>.PI) % (<span class="hljs-number">2</span> * <span class="hljs-built_in">Math</span>.PI) - <span class="hljs-built_in">Math</span>.PI;
+    <span class="hljs-keyword">return</span> [to_deg(d_lon),to_deg(d_lat)];
+};</code></pre><p>Finally, we loop the above calculation for a given distance and set of bearings, and then output the result into a <code>`geojson</code> object for easy display on a web map.</p>
+<p><code>radius</code> is the radius in m for the circle</p>
+<p><code>edge_points</code> is an integer of the number of points that make up the circle. The more points, the more &quot;smooth&quot; the circle.</p>
+<p><code>circle_centre_point</code> is an array of <code>[lon,lat]</code></p>
+<pre class="hljs"><code><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">hopeful_circle</span> (<span class="hljs-params">circle_centre_point, radius, edge_points</span>) </span>{
+  <span class="hljs-comment">//</span>
+  circle_buf_coords = [];
+  <span class="hljs-comment">// first point because geojson needs to close</span>
+  circle_buf_coords.push(destination_point(circle_centre_point[<span class="hljs-number">1</span>],circle_centre_point[<span class="hljs-number">0</span>],radius,<span class="hljs-number">0</span>))
+  <span class="hljs-comment">// looping angles in a circle</span>
+  inc = <span class="hljs-number">360</span> / edge_points
+  start_d = inc
+  <span class="hljs-keyword">for</span> (x = start_d; x &lt;= <span class="hljs-number">360</span>; x += inc) {
+    hc = destination_point(circle_centre_point[<span class="hljs-number">1</span>],circle_centre_point[<span class="hljs-number">0</span>],radius,x);
+    circle_buf_coords.push(hc);
+  }
+  <span class="hljs-comment">// add to array</span>
+  circle_array = [];
+  circle_array.push(circle_buf_coords);
+  <span class="hljs-comment">// add to a geojson object</span>
+  <span class="hljs-keyword">var</span> circle_geojson = {
+    <span class="hljs-string">"type"</span>: <span class="hljs-string">"FeatureCollection"</span>,
+    <span class="hljs-string">"features"</span>: [
+      {
+        <span class="hljs-string">"type"</span>: <span class="hljs-string">"Feature"</span>,
+        <span class="hljs-string">"properties"</span>: {},
+        <span class="hljs-string">"geometry"</span>: {
+          <span class="hljs-string">"type"</span>: <span class="hljs-string">"Polygon"</span>,
+          <span class="hljs-string">"coordinates"</span>: circle_array
+        }
+      }
+    ]
+  }
+  <span class="hljs-comment">// export</span>
+  <span class="hljs-keyword">return</span> circle_geojson</code></pre>    </article>
+  </body>
+</html>
